@@ -89,6 +89,7 @@ async function authenticateImplicitWithAdc() {
     const client = await auths.getClient();
     const tokenResponse = await client.getAccessToken();
     console.log('Access Token:', tokenResponse.token, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc");
+    cachedAccessToken = tokenResponse.token;
 }
 
 // const apikey = process.env.NODE_API_KEY;
