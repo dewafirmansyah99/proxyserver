@@ -40,6 +40,29 @@ async function authenticateImplicitWithAdc() {
 
 authenticateImplicitWithAdc();
 
+// const apikey = process.env.NODE_API_KEY;
+// async function authenticateWithAPIKey(apiKey) {
+//     const auth = new GoogleAuth({ apiKey });
+//     const language = new LanguageServiceClient({ auth });
+
+//     const text = 'Hello, world!';
+
+//     const [response] = await language.analyzeSentiment({
+//         document: {
+//             content: text,
+//             type: 'PLAIN_TEXT',
+//         },
+//     });
+
+//     console.log(`Text: ${text}`);
+//     console.log(
+//         `Sentiment: ${response.documentSentiment.score}, ${response.documentSentiment.magnitude}`,
+//     );
+//     console.log('Successfully authenticated using the API key');
+// }
+
+// authenticateWithAPIKey(apikey);
+
 // Middleware
 app.use(cors()); // Mengaktifkan CORS untuk semua permintaan
 app.use(bodyParser.json()); // Parsing body dalam format JSON
