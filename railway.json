@@ -1,0 +1,26 @@
+{
+    "build": {
+        "env": [
+            "NODE_MAILTRAP_API_URL",
+            "NODE_MAILTRAP_API_TOKEN",
+            "NODE_GEMINI_API_KEY",
+            "NODE_BASE_URL",
+            "NODE_MONGO_URI",
+            "NODE_PROJECT_ID",
+            "NODE_API_KEY",
+            "GOOGLE_APPLICATION_CREDENTIALS_JSON"
+        ]
+    },
+    "deploy": {
+        "env": [
+            "NODE_MAILTRAP_API_URL",
+            "NODE_MAILTRAP_API_TOKEN",
+            "NODE_GEMINI_API_KEY",
+            "NODE_BASE_URL",
+            "NODE_MONGO_URI",
+            "NODE_PROJECT_ID",
+            "NODE_API_KEY",
+            "GOOGLE_APPLICATION_CREDENTIALS_JSON"
+        ]
+    }
+}
