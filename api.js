@@ -72,9 +72,6 @@ async function authenticateImplicitWithAdc() {
     console.log('Listed all storage buckets.NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
 }
 
-authenticateImplicitWithAdc();
-console.log('NGELEWATIN authenticateImplicitWithAdc() oooooooooooooooooooooooooooooooooooooooO')
-
 // const apikey = process.env.NODE_API_KEY;
 // async function authenticateWithAPIKey(apiKey) {
 //     const auth = new GoogleAuth({ apiKey });
@@ -1411,6 +1408,13 @@ app.listen(port, async () => {
     // console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
     console.log(process.env, "********************************")
     console.log(`Server is running on port ${process.env.PORT}`);
+    const auth_google = authenticateImplicitWithAdc();
+    if (auth_google) {
+        console.info('NGELEWATIN authenticateImplicitWithAdc() oooooooooooooooooooooooooooooooooooooooO')
+    }
+    if (!auth_google) {
+        console.error('Failed to authenticate with Google ADC. Please check your credentials.');
+    }
     const connected = await connectToMongo();
     if (!connected) {
         console.error('Failed to connect to MongoDB. Server might not work properly.');
