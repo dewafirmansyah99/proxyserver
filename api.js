@@ -47,11 +47,11 @@ if (credentialsJson) {
 }
 
 
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-    const credentialsPath = '/tmp/gcp-key.json';
-    fs.writeFileSync(credentialsPath, Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, 'base64').toString('utf8'));
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
-}
+// if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+//     const credentialsPath = '/tmp/gcp-key.json';
+//     fs.writeFileSync(credentialsPath, Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, 'base64').toString('utf8'));
+//     process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+// }
 
 // ... kemudian inisialisasi GoogleAuth dan Storage client Anda
 const auths = new GoogleAuth({
