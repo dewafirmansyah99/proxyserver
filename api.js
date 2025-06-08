@@ -19,6 +19,27 @@ const { Storage } = require('@google-cloud/storage');
 const app = express();
 const port = process.env.PORT || 3001;
 
+const projectId = process.env.NODE_PROJECT_ID;
+async function authenticateImplicitWithAdc() {
+    // This snippet demonstrates how to list buckets.
+    // NOTE: Replace the client created below with the client required for your application.
+    // Note that the credentials are not specified when constructing the client.
+    // The client library finds your credentials using ADC.
+    const storage = new Storage({
+        projectId,
+    });
+    const [buckets] = await storage.getBuckets();
+    console.log('Buckets:');
+
+    for (const bucket of buckets) {
+        console.log(`- ${bucket.name}`);
+    }
+
+    console.log('Listed all storage buckets.NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
+}
+
+authenticateImplicitWithAdc();
+
 // Middleware
 app.use(cors()); // Mengaktifkan CORS untuk semua permintaan
 app.use(bodyParser.json()); // Parsing body dalam format JSON
