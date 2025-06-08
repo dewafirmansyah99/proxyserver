@@ -1297,7 +1297,8 @@ app.delete('/api/mongo/cleanup', async (req, res) => {
 });
 
 app.listen(port, async () => {
-    console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
+    // console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
     const connected = await connectToMongo();
     if (!connected) {
         console.error('Failed to connect to MongoDB. Server might not work properly.');
