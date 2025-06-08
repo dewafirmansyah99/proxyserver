@@ -1,4 +1,5 @@
 // File: server.js
+const dotenv = require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -11,7 +12,6 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { MongoClient } = require("mongodb");
 const { GoogleAuth } = require('google-auth-library');
 const { Storage } = require('@google-cloud/storage');
-const dotenv = require('dotenv').config();
 // if (process.env.NODE_ENV !== 'production') {
 // }
 console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
@@ -73,6 +73,7 @@ async function authenticateImplicitWithAdc() {
 }
 
 authenticateImplicitWithAdc();
+console.log('NGELEWATIN authenticateImplicitWithAdc() oooooooooooooooooooooooooooooooooooooooO')
 
 // const apikey = process.env.NODE_API_KEY;
 // async function authenticateWithAPIKey(apiKey) {
