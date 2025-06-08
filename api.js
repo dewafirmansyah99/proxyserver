@@ -76,7 +76,8 @@ const MAILTRAP_API_TOKEN = process.env.NODE_MAILTRAP_API_TOKEN;
 // const MAILTRAP_API_TOKEN = 'fdcac0793747c5bd073a8d56667aa09b';
 
 const auth = new GoogleAuth({
-    scopes: 'https://www.googleapis.com/auth/devstorage.read_only', // Sesuaikan scope yang dibutuhkan
+    scopes: 'https://www.googleapis.com/auth/cloud-platform', // Sesuaikan scope yang dibutuhkan
+    // scopes: 'https://www.googleapis.com/auth/devstorage.read_only'
 });
 
 let cachedAccessToken = null;
@@ -789,20 +790,50 @@ app.get('/api/content/download', async (req, res) => {
     }
 });
 
+// async function getAccessToken() {
+//     if (cachedAccessToken && accessTokenExpiry > Date.now()) {
+//         return cachedAccessToken;
+//     }
+
+//     try {
+//         const client = await auth.getClient();
+//         const tokenResponse = await client.getAccessToken();
+//         cachedAccessToken = tokenResponse.token;
+//         accessTokenExpiry = Date.now() + (tokenResponse.expires_in * 1000) - 60000;
+//         console.log(cachedAccessToken, "=====================================================")
+//         return cachedAccessToken;
+//     } catch (error) {
+//         console.error('Failed to get new access token:', error);
+//         cachedAccessToken = null;
+//         accessTokenExpiry = null;
+//         throw error;
+//     }
+// }
+
 async function getAccessToken() {
     if (cachedAccessToken && accessTokenExpiry > Date.now()) {
+        console.log("Using cached access token.");
         return cachedAccessToken;
     }
 
     try {
-        const client = await auth.getClient();
+        console.log("Attempting to get new access token...");
+        const client = await auth.getClient(); // Ini harus berhasil sekarang
         const tokenResponse = await client.getAccessToken();
+
+        if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
+            throw new Error('Invalid token response from Google Auth client.');
+        }
+
         cachedAccessToken = tokenResponse.token;
-        accessTokenExpiry = Date.now() + (tokenResponse.expires_in * 1000) - 60000; // Kurangi 1 menit untuk keamanan
-        console.log(cachedAccessToken, "=====================================================")
+        // Kurangi beberapa detik/menit dari expiry untuk keamanan (misalnya, 5 menit = 300000 ms)
+        accessTokenExpiry = Date.now() + (tokenResponse.expires_in * 1000) - 300000;
+
+        console.log("Successfully obtained new access token. Expires in:", (tokenResponse.expires_in / 60).toFixed(2), "minutes.");
+        // console.log(cachedAccessToken, "====================================================="); // Hindari log token ke console di produksi
         return cachedAccessToken;
     } catch (error) {
-        console.error('Failed to get new access token:', error);
+        console.error('Failed to get new access token:', error.message); // Log error message saja
         cachedAccessToken = null;
         accessTokenExpiry = null;
         throw error;
