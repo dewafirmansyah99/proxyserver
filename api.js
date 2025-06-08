@@ -11,6 +11,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { MongoClient } = require("mongodb");
 const { GoogleAuth } = require('google-auth-library');
 const { Storage } = require('@google-cloud/storage');
+require('dotenv').config();
 // const upload = multer({ dest: 'uploads/' });
 // const fetch = require('node-fetch')
 // import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -18,6 +19,36 @@ const { Storage } = require('@google-cloud/storage');
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// ====================================================================================
+console.log('--- STARTING APP ---');
+
+// Log untuk memeriksa variabel lingkungan GOOGLE_APPLICATION_CREDENTIALS_JSON
+console.log('Checking GOOGLE_APPLICATION_CREDENTIALS_JSON...');
+const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+
+if (credentialsJson) {
+    console.log('GOOGLE_APPLICATION_CREDENTIALS_JSON DITEMUKAN!');
+    try {
+        const parsed = JSON.parse(credentialsJson);
+        console.log('JSON Berhasil di-parse. Project ID:', parsed.project_id);
+        // Jangan log 'private_key' atau data sensitif lainnya secara penuh!
+        console.log('Client Email:', parsed.client_email);
+    } catch (e) {
+        console.error('ERROR: Gagal mem-parse GOOGLE_APPLICATION_CREDENTIALS_JSON:', e.message);
+        console.error('Mungkin format JSON salah di Railway. Coba pastikan tidak ada kutipan tambahan di awal/akhir.');
+    }
+} else {
+    console.warn('PERINGATAN: GOOGLE_APPLICATION_CREDENTIALS_JSON TIDAK DITEMUKAN!');
+    console.warn('Pastikan variabel lingkungan ini diatur dengan benar di Railway.');
+}
+
+// ... kemudian inisialisasi GoogleAuth dan Storage client Anda
+const auths = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'], // Sesuaikan dengan kebutuhan izin Anda
+});
+const storages = new Storage(); // Ini akan mencoba memuat kredensial default
+// ====================================================================================
 
 const projectId = process.env.NODE_PROJECT_ID;
 async function authenticateImplicitWithAdc() {
