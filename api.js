@@ -46,6 +46,13 @@ if (credentialsJson) {
     console.warn('Pastikan variabel lingkungan ini diatur dengan benar di Railway.');
 }
 
+
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    const credentialsPath = '/tmp/gcp-key.json';
+    fs.writeFileSync(credentialsPath, Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, 'base64').toString('utf8'));
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+}
+
 // ... kemudian inisialisasi GoogleAuth dan Storage client Anda
 const auths = new GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/cloud-platform'], // Sesuaikan dengan kebutuhan izin Anda
