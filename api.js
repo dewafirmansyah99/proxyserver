@@ -61,9 +61,6 @@ if (credentialsJson) {
 // }
 
 // ... kemudian inisialisasi GoogleAuth dan Storage client Anda
-const auths = new GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'], // Sesuaikan dengan kebutuhan izin Anda
-});
 const storages = new Storage(); // Ini akan mencoba memuat kredensial default
 // ====================================================================================
 
@@ -84,6 +81,14 @@ async function authenticateImplicitWithAdc() {
     }
 
     console.log('Listed all storage buckets.NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN');
+
+    const auths = new GoogleAuth({
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'], // Sesuaikan dengan kebutuhan izin Anda
+    });
+
+    const client = await auths.getClient();
+    const tokenResponse = await client.getAccessToken();
+    console.log('Access Token:', tokenResponse.token, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc");
 }
 
 // const apikey = process.env.NODE_API_KEY;
@@ -855,7 +860,7 @@ app.get('/api/content/download', async (req, res) => {
 //         throw error;
 //     }
 // }
-
+console.log(auth.getClient(), "====================================================="); // Log client untuk debugging
 async function getAccessToken() {
     if (cachedAccessToken && accessTokenExpiry > Date.now()) {
         console.log("Using cached access token.");
@@ -866,6 +871,7 @@ async function getAccessToken() {
         console.log("Attempting to get new access token...");
         const client = await auth.getClient(); // Ini harus berhasil sekarang
         const tokenResponse = await client.getAccessToken();
+
 
         if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
             throw new Error('Invalid token response from Google Auth client.');
