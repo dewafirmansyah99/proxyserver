@@ -1020,6 +1020,7 @@ app.get('/api/bucket/folders/read', async (req, res) => {
             data: response.data
         });
     } catch (error) {
+        console.error('Gagal mendapatkan folder:', error);
         if (error.response && error.response.status === 401) {
             try {
                 cachedAccessToken = null;
