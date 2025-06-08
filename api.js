@@ -23,6 +23,13 @@ console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPP
 const app = express();
 const port = process.env.PORT;
 
+if (process.env.GCP_CREDENTIALS_BASE64) {
+    const credentialsPath = path.join('/tmp', 'gcp-key.json');
+    const decoded = Buffer.from(process.env.GCP_CREDENTIALS_BASE64, 'base64').toString('utf8');
+    fs.writeFileSync(credentialsPath, decoded);
+    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON = credentialsPath;
+}
+
 // ====================================================================================
 console.log('--- STARTING APP ---');
 
