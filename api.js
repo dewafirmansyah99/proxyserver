@@ -11,9 +11,10 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { MongoClient } = require("mongodb");
 const { GoogleAuth } = require('google-auth-library');
 const { Storage } = require('@google-cloud/storage');
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
+const dotenv = require('dotenv').config();
+// if (process.env.NODE_ENV !== 'production') {
+// }
+console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
 // const upload = multer({ dest: 'uploads/' });
 // const fetch = require('node-fetch')
 // import { GoogleGenerativeAI } from "@google/generative-ai";
