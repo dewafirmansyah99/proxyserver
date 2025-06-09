@@ -1,17 +1,35 @@
 // File: server.js
-const dotenv = require('dotenv').config();
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const multer = require('multer');
-const fs = require('fs');
-const fs_promises = require('fs').promises;
-const path = require('path');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { MongoClient } = require("mongodb");
-const { GoogleAuth } = require('google-auth-library');
-const { Storage } = require('@google-cloud/storage');
+// const dotenv = require('dotenv').config();
+// const express = require('express');
+// const axios = require('axios');
+// const cors = require('cors');
+// const bodyParser = require('body-parser');
+// const multer = require('multer');
+// const fs = require('fs');
+// const fs_promises = require('fs').promises;
+// const path = require('path');
+// const { GoogleGenerativeAI } = require("@google/generative-ai");
+// const { MongoClient } = require("mongodb");
+// const { GoogleAuth } = require('google-auth-library');
+// const { Storage } = require('@google-cloud/storage');
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import axios from 'axios';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import multer from 'multer';
+import fs from 'fs';
+import fs_promises from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { MongoClient } from 'mongodb';
+import { GoogleAuth } from 'google-auth-library';
+import { Storage } from '@google-cloud/storage';
 // if (process.env.NODE_ENV !== 'production') {
 // }
 console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
@@ -131,6 +149,7 @@ const auth = new GoogleAuth({
     scopes: 'https://www.googleapis.com/auth/cloud-platform', // Sesuaikan scope yang dibutuhkan
     // scopes: 'https://www.googleapis.com/auth/devstorage.read_only'
 });
+const clients = await auth.getClient();
 
 let cachedAccessToken = null;
 let accessTokenExpiry = null;
@@ -870,8 +889,8 @@ async function getAccessToken() {
 
     try {
         console.log("Attempting to get new access token...");
-        const client = await auth.getClient(); // Ini harus berhasil sekarang
-        const tokenResponse = await client.getAccessToken();
+        // const client = await auth.getClient(); // Ini harus berhasil sekarang
+        const tokenResponse = await clients.getAccessToken();
 
 
         if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
