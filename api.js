@@ -1444,6 +1444,28 @@ app.delete('/api/mongo/cleanup', async (req, res) => {
     }
 });
 
+app.delete('/api/mongo/delete/history', async (req, res) => {
+    try {
+        const items = db.collection('chat');
+        const { chatId } = req.query;
+
+        if (!chatId) {
+            return res.status(400).json({
+                error: 'chatId harus ada'
+            });
+        }
+        const query = { "chat.text": chatId };
+        const result = await items.deleteOne(query);
+        return res.json(result);
+    } catch (error) {
+        console.error('Error in delete history:', error);
+        return res.status(500).json({
+            error: 'Server Error',
+            message: error.message
+        });
+    }
+});
+
 app.listen(port, async () => {
     // console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
     console.log(process.env, "********************************")
