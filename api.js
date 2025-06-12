@@ -108,7 +108,6 @@ const authenticateImplicitWithAdc = async () => {
     const client = await auths.getClient();
     const tokenResponse = await client.getAccessToken();
     console.log('Access Token:', tokenResponse.token, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc");
-    cachedAccessToken = tokenResponse.token;
     return tokenResponse.token
 }
 
@@ -152,8 +151,12 @@ const auth = new GoogleAuth({
     // scopes: 'https://www.googleapis.com/auth/devstorage.read_only'
 });
 const clients = await auth.getClient();
-
+const newTokenResponse = await clients.getAccessToken();
 let cachedAccessToken = null;
+if (newTokenResponse) {
+    cachedAccessToken = newTokenResponse.token;
+}
+// let cachedAccessToken = clients.getAccessToken();
 let accessTokenExpiry = null;
 const storage = new Storage();
 const bucketName = 'shiradoc_file_demo'
@@ -908,7 +911,7 @@ async function getAccessToken() {
         return cachedAccessToken;
     } catch (error) {
         console.error('Failed to get new access token:', error.message); // Log error message saja
-        cachedAccessToken = null;
+        // cachedAccessToken = null;
         accessTokenExpiry = null;
         throw error;
     }
@@ -951,7 +954,7 @@ app.get('/api/list-buckets', async (req, res) => {
         if (error.response && error.response.status === 401) {
             // Jika token tidak valid, coba dapatkan token baru dan coba lagi (sederhana)
             try {
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 accessTokenExpiry = null;
                 const newAccessToken = await getAccessToken();
                 const retryResponse = await axios.get('https://storage.googleapis.com/storage/v1/b?project=gen-lang-client-0500049568', {
@@ -971,7 +974,7 @@ app.get('/api/list-buckets', async (req, res) => {
 
 // Contoh sederhana endpoint untuk "refresh" token (sebenarnya hanya meminta token baru)
 app.get('/api/refresh-access-token', async (req, res) => {
-    cachedAccessToken = null;
+    // cachedAccessToken = null;
     accessTokenExpiry = null;
     try {
         const newAccessToken = await getAccessToken();
@@ -1000,7 +1003,7 @@ async function fetchMetadataWithRetry(bucketName, fileName, folderName, maxRetri
             console.error(`Attempt ${attempt} failed:`, error.message);
             if (error.response && error.response.status === 401) {
                 console.log("Authentication error, trying to refresh token...");
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 const newAccessToken = await getAccessToken();
                 console.log("New token obtained.");
                 // Retry dengan token baru pada iterasi berikutnya
@@ -1097,7 +1100,7 @@ app.get('/api/bucket/folders/read', async (req, res) => {
         console.error('Gagal mendapatkan folder:', error);
         if (error.response && error.response.status === 401) {
             try {
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 const newAccessToken = await getAccessToken();
                 const retryResponse = await axios.get(`https://storage.googleapis.com/storage/v1/b/${bucketName}/folders`, {
                     headers: {
@@ -1162,7 +1165,7 @@ app.post('/api/bucket/folders/create', async (req, res) => {
                         error: 'nama folder harus ada'
                     });
                 }
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 const newAccessToken = await getAccessToken();
                 const retryResponse = await axios.post(`https://storage.googleapis.com/storage/v1/b/${bucketName}/folders?recursive=true`, data, {
                     headers: {
@@ -1214,7 +1217,7 @@ app.post('/api/bucket/upload', upload.single('file'), async (req, res) => {
                 //     return res.status(400).json({ error: 'Tidak ada file yang diunggah.' });
                 // }
                 const { bucketName, folderName, fileName } = req.query;
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 const newAccessToken = await getAccessToken();
                 if (!bucketName || !fileName) {
                     return res.status(400).json({ error: 'Parameter bucketName dan fileName harus disertakan dalam query.' });
@@ -1263,7 +1266,7 @@ app.get('/api/bucket/objects/read', async (req, res) => {
     } catch (error) {
         if (error.response && error.response.status === 401) {
             try {
-                cachedAccessToken = null;
+                // cachedAccessToken = null;
                 const newAccessToken = await getAccessToken();
                 const retryResponse = await axios.get(`https://storage.googleapis.com/storage/v1/b/${bucketName}/o?prefix=${folderName}/`, {
                     headers: {
@@ -1558,19 +1561,20 @@ app.listen(port, async () => {
     // console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
     console.log(process.env, "********************************")
     console.log(`Server is running on port ${process.env.PORT}`);
-    const auth_google = authenticateImplicitWithAdc();
-    if (auth_google) {
-        console.info('NGELEWATIN authenticateImplicitWithAdc() oooooooooooooooooooooooooooooooooooooooO')
-    }
-    if (!auth_google) {
-        console.error('Failed to authenticate with Google ADC. Please check your credentials.');
-    }
+    // const auth_google = authenticateImplicitWithAdc();
+    // if (auth_google) {
+    //     console.info('NGELEWATIN authenticateImplicitWithAdc() oooooooooooooooooooooooooooooooooooooooO')
+    // }
+    // if (!auth_google) {
+    //     console.error('Failed to authenticate with Google ADC. Please check your credentials.');
+    // }
     const connected = await connectToMongo();
     if (!connected) {
         console.error('Failed to connect to MongoDB. Server might not work properly.');
     }
     if (cachedAccessToken) {
         console.info('berhasil mendapatkan access token')
+        console.log(`Access token: ${cachedAccessToken}`);
     }
 });
 
