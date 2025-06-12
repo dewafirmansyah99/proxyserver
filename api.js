@@ -30,6 +30,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MongoClient } from 'mongodb';
 import { GoogleAuth } from 'google-auth-library';
 import { Storage } from '@google-cloud/storage';
+import { sendEmail } from './sendEmail.mjs';
 // if (process.env.NODE_ENV !== 'production') {
 // }
 console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
@@ -1464,6 +1465,92 @@ app.delete('/api/mongo/delete/history', async (req, res) => {
             error: 'Server Error',
             message: error.message
         });
+    }
+});
+
+const setfooter = () => {
+    const date = new Date();
+    return `&copy; ${date.getFullYear()} Shiradoc.All rights reserved.`
+}
+
+app.post('/api/send-email', async (req, res) => {
+    const { to, subject, text } = req.body;
+
+    if (!to || !subject || !text) {
+        return res.status(400).json({ error: 'to, subject, and text are required' });
+    }
+
+    const html = `
+        <!DOCTYPE html>
+        <html>
+
+        <head>
+            <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+            <style>
+                body {
+                    background-color: #f4f4f4;
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .email-container {
+                    background: #ffffff;
+                    padding: 20px;
+                    margin: 40px auto;
+                    max-width: 600px;
+                    border-radius: 10px;
+                    /* From https://css.glass */
+                    background: rgba(11, 247, 189, 0.24);
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(3.1px);
+                    -webkit-backdrop-filter: blur(3.1px);
+                    border: 1px solid rgba(11, 247, 189, 0.3);
+                    text-align: center;
+                }
+
+                h1 {
+                    color: #333;
+                }
+
+                p {
+                    color: #555;
+                    font-size: 16px;
+                }
+
+                .footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    font-size: 12px;
+                    color: #aaa;
+                }
+            </style>
+            <script>
+                function getYear() {
+                    const date = new Date();
+                }
+                window.onload = getYear;
+            </script>
+        </head>
+
+        <body>
+            <div class="email-container">
+                <h1 class="text-xl mb-5">KODE OTP</h1>
+                <p>${text}</p>
+                <div class="footer">
+                    <p>${setfooter()}</p>
+                </div>
+            </div>
+        </body>
+
+        </html>
+    `;
+
+    try {
+        const result = await sendEmail({ to, subject, text, html });
+        res.json({ success: true, message: 'Email sent successfully', result });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to send email', error: err.message });
     }
 });
 
