@@ -83,7 +83,7 @@ const storages = new Storage(); // Ini akan mencoba memuat kredensial default
 // ====================================================================================
 
 const projectId = process.env.NODE_PROJECT_ID;
-async function authenticateImplicitWithAdc() {
+const authenticateImplicitWithAdc = async () => {
     // This snippet demonstrates how to list buckets.
     // NOTE: Replace the client created below with the client required for your application.
     // Note that the credentials are not specified when constructing the client.
@@ -108,6 +108,7 @@ async function authenticateImplicitWithAdc() {
     const tokenResponse = await client.getAccessToken();
     console.log('Access Token:', tokenResponse.token, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc");
     cachedAccessToken = tokenResponse.token;
+    return tokenResponse.token
 }
 
 // const apikey = process.env.NODE_API_KEY;
@@ -888,9 +889,9 @@ async function getAccessToken() {
     }
 
     try {
-        console.log("Attempting to get new access token...");
+        console.log("Attempting to get new access token with authenticateImplicitWithAdc...");
         // const client = await auth.getClient(); // Ini harus berhasil sekarang
-        const tokenResponse = await clients.getAccessToken();
+        const tokenResponse = await authenticateImplicitWithAdc();
 
 
         if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
