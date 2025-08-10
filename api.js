@@ -31,6 +31,7 @@ import { MongoClient } from 'mongodb';
 import { GoogleAuth } from 'google-auth-library';
 import { Storage } from '@google-cloud/storage';
 import { sendEmail } from './sendEmail.mjs';
+// import cookieParser from 'cookie-parser';
 // if (process.env.NODE_ENV !== 'production') {
 // }
 console.log(process.env.NODE_PROJECT_ID, "NODE_MONGO_URIPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
@@ -134,11 +135,59 @@ const authenticateImplicitWithAdc = async () => {
 
 // authenticateWithAPIKey(apikey);
 
+// async function autoPersistentCookie(cookieName, options = {}) {
+//     const expireMinutes = options.expireMinutes || 30; // default 30 menit
+
+//     return (req, res, next) => {
+//         const now = Date.now();
+
+//         // Fungsi buat cookie baru
+//         const createCookie = async () => {
+//             const clients = await auth.getClient();
+//             const newTokenResponse = await clients.getAccessToken();
+//             const expires = new Date(now + expireMinutes * 60 * 1000); // +30 menit
+//             const defaultOptions = {
+//                 expires,
+//                 httpOnly: true,
+//                 secure: false, // ubah ke true jika pakai HTTPS
+//                 sameSite: 'Strict',
+//             };
+//             res.cookie(cookieName, JSON.stringify({ value: newTokenResponse, created: now }), defaultOptions);
+//         };
+
+//         if (!req.cookies[cookieName]) {
+//             // Cookie belum ada → buat baru
+//             createCookie();
+//         } else {
+//             try {
+//                 const cookieData = JSON.parse(req.cookies[cookieName]);
+//                 const createdTime = cookieData.created;
+
+//                 // Jika sudah lewat 30 menit → buat baru
+//                 if (now - createdTime > expireMinutes * 60 * 1000) {
+//                     createCookie();
+//                 }
+//             } catch (err) {
+//                 // Jika format cookie tidak valid → buat baru
+//                 createCookie();
+//             }
+//         }
+
+//         next();
+//     };
+// }
+
 // Middleware
 app.use(cors()); // Mengaktifkan CORS untuk semua permintaan
 app.use(bodyParser.json()); // Parsing body dalam format JSON
 app.use(express.json({ limit: '200mb', extended: true }));
 app.use(express.urlencoded({ limit: '200mb', extended: true, parameterLimit: 50000 }));
+// app.use(cookieParser());
+// app.use(autoPersistentCookie('session_cookie', { expireMinutes: 30 }));
+// app.use((req, res, next) => {
+//     console.log('XXXXXXXXXXXXXXXXXXXXXXXXXX Cookie XXXXXXXXXXXXXXXXXXXXXXXXXX:', req.cookies); // ini akan jalan di semua request
+//     next();
+// });
 
 // Konfigurasi Mailtrap
 const MAILTRAP_API_URL = process.env.NODE_MAILTRAP_API_URL;
@@ -146,9 +195,12 @@ const MAILTRAP_API_TOKEN = process.env.NODE_MAILTRAP_API_TOKEN;
 // const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send';
 // const MAILTRAP_API_TOKEN = 'fdcac0793747c5bd073a8d56667aa09b';
 
+// const auth = new GoogleAuth({
+//     scopes: 'https://www.googleapis.com/auth/cloud-platform', // Sesuaikan scope yang dibutuhkan
+//     // scopes: 'https://www.googleapis.com/auth/devstorage.read_only'
+// });
 const auth = new GoogleAuth({
     scopes: 'https://www.googleapis.com/auth/cloud-platform', // Sesuaikan scope yang dibutuhkan
-    // scopes: 'https://www.googleapis.com/auth/devstorage.read_only'
 });
 const clients = await auth.getClient();
 const newTokenResponse = await clients.getAccessToken();
@@ -893,26 +945,31 @@ async function getAccessToken() {
     }
 
     try {
-        console.log("Attempting to get new access token with authenticateImplicitWithAdc...");
+        // console.log("Attempting to get new access token with authenticateImplicitWithAdc...");
         // const client = await auth.getClient(); // Ini harus berhasil sekarang
-        const tokenResponse = await authenticateImplicitWithAdc();
+        // const tokenResponse = await authenticateImplicitWithAdc();
 
 
-        if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
-            throw new Error('Invalid token response from Google Auth client.');
-        }
+        // if (!tokenResponse || !tokenResponse.token || !tokenResponse.expires_in) {
+        //     throw new Error('Invalid token response from Google Auth client.');
+        // }
 
-        cachedAccessToken = tokenResponse.token;
+        // cachedAccessToken = tokenResponse.token;
+        const clients = await auth.getClient();
+        // const newTokenResponse = process.env.NODE_ACCESS_TOKEN_CACHE;
+        const newTokenResponse = await clients.getAccessToken();
+        // let cachedAccessToken = process.env.NODE_ACCESS_TOKEN_CACHE;
+        // process.env.NODE_ACCESS_TOKEN_CACHE = newTokenResponse;
         // Kurangi beberapa detik/menit dari expiry untuk keamanan (misalnya, 5 menit = 300000 ms)
-        accessTokenExpiry = Date.now() + (tokenResponse.expires_in * 1000) - 300000;
+        // accessTokenExpiry = Date.now() + (tokenResponse.expires_in * 1000) - 300000;
 
-        console.log("Successfully obtained new access token. Expires in:", (tokenResponse.expires_in / 60).toFixed(2), "minutes.");
+        // console.log("Successfully obtained new access token. Expires in:", (tokenResponse.expires_in / 60).toFixed(2), "minutes.");
         // console.log(cachedAccessToken, "====================================================="); // Hindari log token ke console di produksi
-        return cachedAccessToken;
+        return newTokenResponse;
     } catch (error) {
         console.error('Failed to get new access token:', error.message); // Log error message saja
         // cachedAccessToken = null;
-        accessTokenExpiry = null;
+        // accessTokenExpiry = null;
         throw error;
     }
 }
@@ -984,7 +1041,7 @@ app.get('/api/refresh-access-token', async (req, res) => {
     }
 });
 
-async function fetchMetadataWithRetry(bucketName, fileName, folderName, maxRetries = 10, delay = 1000) {
+async function fetchMetadataWithRetry(bucketName, fileName, folderName, maxRetries = 100, delay = 1000) {
     let attempt = 0;
     while (attempt < maxRetries) {
         attempt++;
