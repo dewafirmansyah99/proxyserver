@@ -20,7 +20,7 @@ import axios from 'axios';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import multer from 'multer';
-import fs from 'fs';
+import fs, { read } from 'fs';
 import fs_promises from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -203,11 +203,26 @@ const auth = new GoogleAuth({
     scopes: 'https://www.googleapis.com/auth/cloud-platform', // Sesuaikan scope yang dibutuhkan
 });
 const clients = await auth.getClient();
-const newTokenResponse = await clients.getAccessToken();
-let cachedAccessToken = null;
-if (newTokenResponse) {
-    cachedAccessToken = newTokenResponse.token;
+// const newTokenResponse = await clients.getAccessToken();
+let cachedAccessToken = clients.getAccessToken().token;
+if (!cachedAccessToken) {
+    readDataToken({ name: 'token-google' }).then((tokens) => {
+        if (tokens && tokens.length > 0 && tokens[0].token) {
+            cachedAccessToken = tokens[0].token;
+            console.log("MENGAMBIL CACHE TOKEN", cachedAccessToken);
+        } else {
+            console.log("Token tidak ditemukan di database.");
+        }
+    })
 }
+// readDataToken({ name: 'token-google' })
+//     .then((token) => {
+//         cachedAccessToken = token;
+//         console.log('Token!!!!!!!!!!!!!!!!!!!!!!!!:', cachedAccessToken); // aman, nilainya sudah terisi
+//     });
+// if (newTokenResponse) {
+//     cachedAccessToken = readDataToken({ name: 'token-google' });
+// }
 // let cachedAccessToken = clients.getAccessToken();
 let accessTokenExpiry = null;
 const storage = new Storage();
@@ -956,8 +971,20 @@ async function getAccessToken() {
 
         // cachedAccessToken = tokenResponse.token;
         const clients = await auth.getClient();
+        var newTokenResponse = cachedAccessToken;
+        var restoken = await clients.getAccessToken()
+        console.error(restoken, "RESTOKENNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+        await updateDataToken(restoken.token);
         // const newTokenResponse = process.env.NODE_ACCESS_TOKEN_CACHE;
-        const newTokenResponse = await clients.getAccessToken();
+        readDataToken({ name: 'token-google' }).then((tokens) => {
+            if (tokens && tokens.length > 0 && tokens[0].token) {
+                newTokenResponse = tokens[0].token;
+                console.log("MENGAMBIL CACHE TOKEN TERBARUUUUUUUUUUUUU", newTokenResponse);
+            } else {
+                console.log("Token tidak ditemukan di database.");
+            }
+        })
+        console.log("NEW RESPONE TOKEN 66666666666666666666666:", newTokenResponse);
         // let cachedAccessToken = process.env.NODE_ACCESS_TOKEN_CACHE;
         // process.env.NODE_ACCESS_TOKEN_CACHE = newTokenResponse;
         // Kurangi beberapa detik/menit dari expiry untuk keamanan (misalnya, 5 menit = 300000 ms)
@@ -1614,6 +1641,33 @@ app.post('/api/send-email', async (req, res) => {
     }
 });
 
+async function readDataToken(filter = {}) {
+    // const client = await connectToMongo();
+    try {
+        const db = client.db('shiradoc');
+        const data = await db.collection('token').find(filter).toArray();
+        console.log('📄📄📄📄📄📄📄📄📄 Data ditemukan:', data);
+        return data;
+    } catch (error) {
+        console.error('Error reading data:', error);
+    }
+}
+
+async function updateDataToken(updateFields) {
+    // const client = await connectToMongo();
+    try {
+        const db = client.db('shiradoc');
+        const result = await db.collection('token').updateOne(
+            { name: 'token-google' },
+            { $set: { token: updateFields } }
+        );
+        console.log(`✏ ${result.modifiedCount} BERHASIL memperbarui data token =======================.`);
+        return result;
+    } catch (error) {
+        console.error('Error updating data:', error);
+    }
+}
+
 app.listen(port, async () => {
     // console.log(`Server proxy Shiradoc berjalan di http://localhost:${port}`);
     console.log(process.env, "********************************")
@@ -1629,10 +1683,25 @@ app.listen(port, async () => {
     if (!connected) {
         console.error('Failed to connect to MongoDB. Server might not work properly.');
     }
+    if (!cachedAccessToken) {
+        readDataToken({ name: 'token-google' }).then((tokens) => {
+            if (tokens && tokens.length > 0 && tokens[0].token) {
+                cachedAccessToken = tokens[0].token;
+                console.log("MENGAMBIL CACHE TOKEN", cachedAccessToken);
+            } else {
+                console.log("Token tidak ditemukan di database.");
+            }
+        })
+    }
     if (cachedAccessToken) {
         console.info('berhasil mendapatkan access token')
         console.log(`Access token: ${cachedAccessToken}`);
     }
+    readDataToken({ name: 'token-google' })
+    const clientx = await auth.getClient();
+    cachedAccessToken = await clientx.getAccessToken()
+    console.log(`Access token from auth client: ${cachedAccessToken.token}`);
+    await updateDataToken(cachedAccessToken.token);
 });
 
 // Handle graceful shutdown
